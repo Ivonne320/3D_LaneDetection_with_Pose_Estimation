@@ -1,8 +1,3 @@
-## ========================================= ##
-# didn't change anything from apollo plugin   #
-## ========================================= ##
-
-
 from collections import defaultdict
 from typing import List, Tuple
 
