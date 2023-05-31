@@ -33,10 +33,10 @@ class OpenLaneKp(openpifpaf.datasets.DataModule):
     
     # test annotation json dir missing
     
-    train_annotations = 'data_openlane/annotations/openlane_keypoints_sample_training.json'  # merge multiple json files,to do: openlane_to_coco.py 
+    train_annotations = 'data_openlane/annotations/openlane_keypoints_sample_training.json'  
     val_annotations = 'data_openlane/annotations/openlane_keypoints_sample_validation.json' 
     eval_annotations = val_annotations 
-    train_image_dir = '/work/scitas-share/datasets/Vita/civil-459/OpenLane/raw/images/training/' # change to dataset dir
+    train_image_dir = '/work/scitas-share/datasets/Vita/civil-459/OpenLane/raw/images/training/' 
     val_image_dir = '/work/scitas-share/datasets/Vita/civil-459/OpenLane/raw/images/validation/' 
     eval_image_dir = val_image_dir
 
@@ -259,7 +259,7 @@ class OpenLaneKp(openpifpaf.datasets.DataModule):
             preprocess=self._preprocess(),
             annotation_filter=True,
             min_kp_anns=self.min_kp_anns,
-            category_ids=[0,1,2,3,4,5,6,7,8,9,10,11,12,20,21], # extending to multiple lane categories, if not working, pre-process the lanes to single category
+            category_ids=[0,1,2,3,4,5,6,7,8,9,10,11,12,20,21],
         )
         return torch.utils.data.DataLoader(
             train_data, batch_size=self.batch_size, shuffle=not self.debug,
@@ -273,7 +273,7 @@ class OpenLaneKp(openpifpaf.datasets.DataModule):
             preprocess=self._preprocess(),
             annotation_filter=True,
             min_kp_anns=self.min_kp_anns,
-            category_ids=[0,1,2,3,4,5,6,7,8,9,10,11,12,20,21], # extending to multiple lane categories, if not working, pre-process the lanes to single category
+            category_ids=[0,1,2,3,4,5,6,7,8,9,10,11,12,20,21], 
         )
         return torch.utils.data.DataLoader(
             val_data, batch_size=self.batch_size, shuffle=False,
