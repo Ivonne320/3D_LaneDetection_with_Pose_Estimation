@@ -34,7 +34,7 @@ Due to the very different nature of the two datasets, coupled with time and reso
 ## Installation
 ### 1. Clone this repository
 ``` bash
-git clone https://github.com/tlyi/CIVIL-459-Project.git
+git clone https://github.com/vita-student-projects/3dlane_detection_pifpaf_gr19.git
 ```
 
 ### 2. Install OpenPifPaf
