@@ -1,7 +1,3 @@
-## ========================================= ##
-# didn't change anything from apollo plugin   #
-## ========================================= ##
-
 import logging
 
 import numpy as np
