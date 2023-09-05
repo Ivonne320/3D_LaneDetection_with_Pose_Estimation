@@ -17,11 +17,11 @@ IMAGE_HEIGHT = 1280
 
 LANE_KEYPOINTS_24 = [
     '1',       # 1 the nearest
-    '2'        # 2 the farthest
+    '2' ,       # 2 the farthest
 ]
 
 LANE_SKELETON_24 = [
-  (1,2)
+  (0,1),
 ]
 
 
