@@ -1,7 +1,3 @@
-## ========================================= ##
-# didn't change anything from apollo plugin   #
-## ========================================= ##
-
 import logging
 
 import numpy as np
@@ -38,16 +34,25 @@ class MeanPixelError(Base):
 
         # Filter ground-truth
         for annotation in ground_truth:
-            print('before isinstance')
+            # print('before isinstance')
             if not isinstance(annotation, Annotation):
+                print('not isinstance')
                 continue
-            indices_gt = np.nonzero(annotation.data[:, 2] > 1.0)
-            if indices_gt[0].size <= 3:
+            indices_gt = np.nonzero(annotation.data[:, 2] >= 1.0)
+            # print('indices_gt = ', indices_gt)
+            # print('annotation.data = ', annotation.data)
+            if indices_gt[0].size <= 1:
+                # print('indices_gt[0].size =', indices_gt[0].size)
+                # print('indices_gt = ', indices_gt)
                 continue
             gts = annotation.data[indices_gt, 0:2].squeeze()
-            print('gts = ', gts)
+            # print('gts = ', gts)
             width = float(annotation.fixed_bbox[2])
             height = float(annotation.fixed_bbox[3])
+            # print('annotation.fixed_bbox = ', annotation.fixed_bbox)
+            # ensure scale doesn't cause divide by zero
+            if width == 0 or height == 0:
+                continue
             scale = np.array([self.px_ref / width, self.px_ref / height]).reshape(1, 2)
 
             # Evaluate each keypoint
@@ -56,19 +61,21 @@ class MeanPixelError(Base):
                 if preds.size <= 0:
                     continue
                 i = np.argmin(np.linalg.norm(preds - gt, axis=1))
+                
                 dist = preds[i:i + 1] - gt
                 dist_scaled = dist * scale
+                print("dist = ", dist)
                 d = float(np.linalg.norm(dist, axis=1))
                 d_scaled = float(np.linalg.norm(dist_scaled, axis=1))
 
                 # Prediction correct if error less than 10 pixels
-                if d < 10:
+                if d < 20:
                     errors.append(d)
                     detections.append(1)
                 else:
                     detections.append(0)
                     print('d = ', d )
-                if d_scaled < 10:
+                if d_scaled < 20:
                     errors_scaled.append(d)
                     detections_scaled.append(1)
                 else:

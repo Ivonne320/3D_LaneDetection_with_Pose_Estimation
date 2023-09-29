@@ -15,6 +15,7 @@ import numpy as np
 try:
     from pycocotools.coco import COCO
 except ImportError:
+    print('COCO not available')
     COCO = None
 
 import openpifpaf
@@ -33,10 +34,10 @@ class OpenLaneKp(openpifpaf.datasets.DataModule):
     
     # test annotation json dir missing
     
-    train_annotations = 'data_openlane/annotations/openlane_keypoints_sample_training.json'  # merge multiple json files,to do: openlane_to_coco.py 
+    train_annotations = 'data_openlane/annotations/openlane_keypoints_sample_training.json'  
     val_annotations = 'data_openlane/annotations/openlane_keypoints_sample_validation.json' 
     eval_annotations = val_annotations 
-    train_image_dir = '/work/scitas-share/datasets/Vita/civil-459/OpenLane/raw/images/training/' # change to dataset dir
+    train_image_dir = '/work/scitas-share/datasets/Vita/civil-459/OpenLane/raw/images/training/' 
     val_image_dir = '/work/scitas-share/datasets/Vita/civil-459/OpenLane/raw/images/validation/' 
     eval_image_dir = val_image_dir
 
@@ -52,7 +53,7 @@ class OpenLaneKp(openpifpaf.datasets.DataModule):
     b_min = 1  # 1 pixel
 
     eval_annotation_filter = True
-    eval_long_edge = 256  # 0 not recommended for lane detection applications, small value may apply though
+    eval_long_edge = 256  
     eval_orientation_invariant = 0.0
     eval_extended_scale = False
 
@@ -259,7 +260,8 @@ class OpenLaneKp(openpifpaf.datasets.DataModule):
             preprocess=self._preprocess(),
             annotation_filter=True,
             min_kp_anns=self.min_kp_anns,
-            category_ids=[0,1,2,3,4,5,6,7,8,9,10,11,12,20,21], # extending to multiple lane categories, if not working, pre-process the lanes to single category
+            category_ids=[0,1,2,3,4,5,6,7,8,9,10,11,12,20,21], 
+            # category_ids=[0],
         )
         return torch.utils.data.DataLoader(
             train_data, batch_size=self.batch_size, shuffle=not self.debug,
@@ -273,7 +275,8 @@ class OpenLaneKp(openpifpaf.datasets.DataModule):
             preprocess=self._preprocess(),
             annotation_filter=True,
             min_kp_anns=self.min_kp_anns,
-            category_ids=[0,1,2,3,4,5,6,7,8,9,10,11,12,20,21], # extending to multiple lane categories, if not working, pre-process the lanes to single category
+            category_ids=[0,1,2,3,4,5,6,7,8,9,10,11,12,20,21],
+            # category_ids=[0],
         )
         return torch.utils.data.DataLoader(
             val_data, batch_size=self.batch_size, shuffle=False,
@@ -336,7 +339,8 @@ class OpenLaneKp(openpifpaf.datasets.DataModule):
                                           11: self.head_metas[0].keypoints,
                                           12: self.head_metas[0].keypoints,
                                           20: self.head_metas[0].keypoints,
-                                          21: self.head_metas[0].keypoints,},
+                                          21: self.head_metas[0].keypoints,
+                                        },
                     skeleton_by_category={0: self.head_metas[1].skeleton,
                                           1: self.head_metas[1].skeleton,
                                           2: self.head_metas[1].skeleton,
@@ -351,7 +355,8 @@ class OpenLaneKp(openpifpaf.datasets.DataModule):
                                           11: self.head_metas[1].skeleton,
                                           12: self.head_metas[1].skeleton,
                                           20: self.head_metas[1].skeleton,
-                                          21: self.head_metas[1].skeleton,},
+                                          21: self.head_metas[1].skeleton,
+                                        },
                 ),
                 openpifpaf.transforms.ToCrowdAnnotations(self.lane_categories),
             ]),
@@ -366,6 +371,7 @@ class OpenLaneKp(openpifpaf.datasets.DataModule):
             annotation_filter=self.eval_annotation_filter,
             min_kp_anns=self.min_kp_anns if self.eval_annotation_filter else 0,
             category_ids=[0,1,2,3,4,5,6,7,8,9,10,11,12,22,20,21] if self.eval_annotation_filter else [],
+            # category_ids=[0] if self.eval_annotation_filter else [],
         )
         return torch.utils.data.DataLoader(
             eval_data, batch_size=self.batch_size, shuffle=False,
@@ -376,11 +382,21 @@ class OpenLaneKp(openpifpaf.datasets.DataModule):
         # TODO: make sure that 24kp flag is activated when evaluating a 24kp model
         if COCO is None:
             return []
+        # return [openpifpaf.metric.Coco(
+        #     COCO(self.eval_annotations),
+        #     max_per_image=20,
+        #     category_ids=[0,1,2,3,4,5,6,7,8,9,10,11,12,22,20,21],
+        #     iou_type='keypoints',
+        #     # keypoint_oks_sigmas=self.lane_sigmas,
+        #     keypoint_oks_sigmas=None,
+        # ), MeanPixelError()]
+
         return [openpifpaf.metric.Coco(
             COCO(self.eval_annotations),
             max_per_image=20,
             category_ids=[0,1,2,3,4,5,6,7,8,9,10,11,12,22,20,21],
             iou_type='keypoints',
+            # keypoint_oks_sigmas=self.lane_sigmas,
             keypoint_oks_sigmas=self.lane_sigmas,
-        ), MeanPixelError()]
+        ),MeanPixelError()]
 

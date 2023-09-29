@@ -34,7 +34,7 @@ Due to the very different nature of the two datasets, coupled with time and reso
 ## Installation
 ### 1. Clone this repository
 ``` bash
-git clone https://github.com/tlyi/CIVIL-459-Project.git
+git clone https://github.com/vita-student-projects/3dlane_detection_pifpaf_gr19.git
 ```
 
 ### 2. Install OpenPifPaf
@@ -48,7 +48,7 @@ OpenPifPaf uses a Plugin architectural pattern which allows us to train it on a 
 The required files to register our dataset as a plugin is contained in the folder `openpifpaf_openlane`. (IMPORTANT: Do not change the name of this folder as OpenPifPaf requires this naming convention to recognise the plugin.)
 
 ### 3. Download checkpoint (optional)
-The dataset that we are using is very big and will take days to train. We have provided a [checkpoint](https://drive.google.com/file/d/1IEKkXFKS5HWgyEEhrRoDiCdvLgZRtmV7/view?usp=sharing) that has already been trained on 30 epochs on 10% of the dataset, which already took about 5 days. You may choose to train either from scratch (not recommended), or from one of the backbones provided by OpenPifPaf, or on top of our provided checkpoint. 
+The dataset that we are using is very big and will take days to train. We have provided a [checkpoint](https://drive.google.com/file/d/1IEKkXFKS5HWgyEEhrRoDiCdvLgZRtmV7/view?usp=sharing) for 24 keypoints that has already been trained on 30 epochs on 10% of the dataset, which already took about 5 days. And also a [checkpoint](https://drive.google.com/file/d/1fTOkK6wEATc4hNO--PXCsFYstgNLDHS-/view?usp=sharing) fot 2 keypoints trained on 79 epochs on 5% of the dataset. You may choose to train either from scratch (not recommended), or from one of the backbones provided by OpenPifPaf, or on top of our provided checkpoint. 
 
 ## Dataset Description
 The dataset that we have chosen to work with is [OpenLane](https://github.com/OpenDriveLab/OpenLane). OpenLane is the largest scale real world 3D lane dataset. It owns 200K frames and over 880K carefully annotated lanes, where all lanes are annotated with both 2D and 3D information in every frame. For the purpose of this project, we will only be using the 2D lane annotations.
@@ -230,7 +230,7 @@ For all the above mentioned methods, to verify that our methods are working, bef
 
 These are the results after overfitting on the 2-keypoints model.
 <p align="center" width="100%">
-    <img width="50%" src="https://github.com/tlyi/CIVIL-459-Project/assets/69505852/7d16907d-9c9e-4662-b2f5-1ee62ec84c84">
+    <img width="50%" src="https://github.com/tlyi/CIVIL-459-Project/assets/69505852/ed88bd36-d573-4faa-97d3-6a9a3b65785c">
 </p>
 
 
@@ -261,11 +261,11 @@ The below images visualises the components of Composite Intensity Field (CIF) an
 The below images show the comparison between predictions on validaton images using 24 keypoints (top) and 2 keypoints (bottom). These images were generated with the flag `--force-complete-pose` enabled as the models were unable to connect the keypoints well without it. While the outline of the lanes were modelled well, the model predicts it with very low confidence. We deduce that this could either be attributed to insufficient training epochs, or an inappropriately defined loss function (elaborated further [here](#2-redefine-evaluation-metrics)). 
 
 <p align="center" width="100%">
-    <img width="100%" src="https://github.com/tlyi/CIVIL-459-Project/assets/69505852/313af02f-3cca-495f-becd-d6bca832fb4c">
+    <img width="100%" src="https://github.com/tlyi/CIVIL-459-Project/assets/69505852/35edc49b-4afe-48e3-af65-32740b9c46c7">
 </p>
 
 <p align="center" width="100%">
-    <img width="100%" src="https://github.com/tlyi/CIVIL-459-Project/assets/69505852/35a77888-632e-4cd9-86a1-bcd050705033">
+    <img width="100%" src="https://github.com/tlyi/CIVIL-459-Project/assets/69505852/fb5df390-e021-4737-a55a-6fce8f0c302c">
 </p>
 
 Using both methods, straight lanes are properly detected. However, as expected, curved lanes are over-simplified using just 2 keypoints, while with 24 keypoints, the curves are captured quite well. 
@@ -288,7 +288,7 @@ Since the COCO annotations were designed to work with 2D objects, we found it di
 We have visually demonstrated the feasibility of extending the capabilities of OpenPifPaf to the task of lane detection.
 While there exists plenty of space for improvement, we are satisfied with the results we have achieved given the time and resource constraints, and believe that it still serves as a meaningful preliminary proof of concept for the task. 
 
-Through working on this project, we were able to apply all our learnings from this course and see for ourselves the massive potential that deep learning has to offer in the field of autonomous vehicles. It has truly been a fruitful journey. We are grateful for the help and guidance from the teaching team of CIVIL-459.
+Through working on this project, we were able to apply all our learnings from this course and see for ourselves the massive potential that deep learning has to offer in the field of autonomous vehicles. It has truly been a fruitful journey. We are grateful for the help from teaching team.
 
 ## References
 Kreiss, S., Bertoni, L., &amp; Alahi, A. (2022). OpenPifPaf: Composite fields for semantic keypoint detection and spatio-temporal association. IEEE Transactions on Intelligent Transportation Systems, 23(8), 13498–13511. https://doi.org/10.1109/tits.2021.3124981 
