@@ -7,3 +7,4 @@ outputs/
 core.*
 all-images*
 course-test/
+predictions/

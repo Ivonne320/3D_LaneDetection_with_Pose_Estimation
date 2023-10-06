@@ -32,7 +32,7 @@ def cli():
     parser.add_argument('--dir_out', default='./data_openlane',
                         help='where to save annotations and files')
     parser.add_argument('--sample', action='store_true',
-                        help='Whether to only process the first 50 images')
+                        help='Whether to only process 50%% images')
     parser.add_argument('--single_sample', action='store_true',
                         help='Whether to only process the first image')
     args = parser.parse_args()
@@ -81,6 +81,30 @@ class OpenLaneToCoco:
             "training": training_files,
             "validation": validation_files,
         }
+    def downsample(self, u, v, target_length=24):
+        """
+        Downsample the number of keypoints to 24, keeping the first and last keypoints, while maintaining equal distance between keypoints 
+        :param u: x coordinates of keypoints
+        :param v: y coordinates of keypoints
+        :param target_length: number of keypoints to downsample to
+        :return: downsampled u and v coordinates
+        """
+
+        # Calculate cumulative distance
+        delta_u = np.diff(u)
+        delta_v = np.diff(v)
+        distances = np.sqrt(delta_u**2 + delta_v**2)
+        cum_distances = np.insert(np.cumsum(distances), 0, 0)
+
+        # Create target distances for interpolation
+        total_distance = cum_distances[-1]
+        target_distances = np.linspace(0, total_distance, target_length)
+
+        # Interpolate the u and v values
+        u_new = np.interp(target_distances, cum_distances, u)
+        v_new = np.interp(target_distances, cum_distances, v)
+        
+        return u_new, v_new
 
     def process(self):
         """
@@ -96,11 +120,13 @@ class OpenLaneToCoco:
 
             #Optional arguments
             if self.sample:
-                #keep 10% of the dataset, uniformly distributed
-                ann_paths = ann_paths[::10]
+                #keep 25% of the dataset, uniformly distributed
+
+                ann_paths = ann_paths[::4]
+                
 
             if self.single_sample:
-                ann_paths = self.splits['train'][:1]
+                ann_paths = self.splits['training'][:1]
 
             #Iterate through json files and process into COCO style
             for ann_path in ann_paths:
@@ -146,15 +172,18 @@ class OpenLaneToCoco:
 
                     #note kp_coords format is [[u],[v]]
                     num_kp = len(kp_coords[0])
-                    if num_kp < 24:
-                        continue
+                    # if num_kp < 24:
+                    #     continue
                     
-                    #downsample to 24 kps
-                    kp_coords = kp_coords[:,::num_kp//24]
-                    #make sure to keep only the first 24 keypoints [u,v,1] in kps
-                    kp_coords = kp_coords[:,:24]
-                    #update num_kp to the new number of keypoints, it should be 24
+                    # #downsample to 24 kps
+                    # kp_coords = kp_coords[:,::num_kp//24]
+                    # #make sure to keep only the first 24 keypoints [u,v,1] in kps
+                    # kp_coords = kp_coords[:,:24]
+                    # #update num_kp to the new number of keypoints, it should be 24
+                    # num_kp = int(len(kp_coords[0]))
+                    new_u, new_v = self.downsample(kp_coords[0], kp_coords[1])
                     num_kp = int(len(kp_coords[0]))
+                    new_kp_coords = [new_u, new_v]
 
                     #TODO: figure out why number of points in visibility != len(uv) but = len(xyz).
                     #For now, assume all points have visibility = 1
@@ -162,12 +191,12 @@ class OpenLaneToCoco:
                    
                     kps = []
                     #keypoints need to be in [xi, yi, vi format]
-                    for u, v in zip(kp_coords[0], kp_coords[1]):
+                    for u, v in zip(new_kp_coords[0], new_kp_coords[1]):
                         kps.extend([u, v, 1]) #Note: visibility might not be correct
                 
                     #define bounding box based on area derived from 2d coords     
-                    box_tight = [np.min(kp_coords[0]), np.min(kp_coords[1]),
-                                np.max(kp_coords[0]), np.max(kp_coords[1])]
+                    box_tight = [np.min(new_kp_coords[0]), np.min(new_kp_coords[1]),
+                                np.max(new_kp_coords[0]), np.max(new_kp_coords[1])]
                     w, h = box_tight[2] - box_tight[0], box_tight[3] - box_tight[1]
                     x_o = max(box_tight[0] - 0.1 * w, 0)
                     y_o = max(box_tight[1] - 0.1 * h, 0)
