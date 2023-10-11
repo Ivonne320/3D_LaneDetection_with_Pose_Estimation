@@ -742,13 +742,13 @@ def prune_2d_gt_lane_by_range(lane_2d, x_min, x_max):
                                      lane_2d[:, 0] < x_max), ...]
     return lane_2d
 def prune_2d_lane_by_range(lane_2d, x_min, x_max):
-    print("before prune lane_2d:", lane_2d)
+    # print("before prune lane_2d:", lane_2d)
     # remove lane points out of x range
     keypoints_array = np.array(lane_2d['keypoints'][0::3])
-    print("keypoints_array: ", keypoints_array)
+    # print("keypoints_array: ", keypoints_array)
     # Create a mask for lane points within the x range
     mask = np.logical_and(keypoints_array >= x_min, keypoints_array <= x_max)
-    print("mask: ", mask)
+    # print("mask: ", mask)
     
     # Apply mask (assuming lane_2d is a structured NumPy array)
     if isinstance(lane_2d, np.ndarray):
@@ -761,7 +761,7 @@ def prune_2d_lane_by_range(lane_2d, x_min, x_max):
         # for i in valid_indices:
         #     lane_2d['keypoints'][i] = lane_2d['keypoints'][i]
         lane_2d['keypoints'] = lane_2d_np.reshape(-1).tolist()
-    print("after prune lane_2d:", lane_2d)
+    # print("after prune lane_2d:", lane_2d)
     return lane_2d
 def resample_laneline_in_y(input_lane, y_steps, out_vis=False):
     """
@@ -809,14 +809,15 @@ def resample_2dlaneline_in_y(input_lane, y_steps, out_vis=False):
     return x_values
 
 def resample_2dpred_laneline_in_y(input_lane, y_steps, out_vis=False):
-    assert(input_lane.shape[0] >= 2)
-    print("input_lane: ", input_lane)   
+    
+    assert(input_lane.shape[0] >= 4)
+    # print("input_lane: ", input_lane)   
     y_array = np.array(input_lane[1::3])
     x_array = np.array(input_lane[0::3])
     y_min = np.min(y_array)-5
     y_max = np.max(y_array)+5
-    print("y_array: ", y_array)
-    print("x_array: ", x_array)
+    # print("y_array: ", y_array)
+    # print("x_array: ", x_array)
     f_x = interp1d(y_array, x_array, fill_value="extrapolate")
     x_values = f_x(y_steps)
     if out_vis:

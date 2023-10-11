@@ -182,6 +182,7 @@ class OpenLaneToCoco:
                     # #update num_kp to the new number of keypoints, it should be 24
                     # num_kp = int(len(kp_coords[0]))
                     new_u, new_v = self.downsample(kp_coords[0], kp_coords[1])
+                    new_u, new_v = self.downsample(new_u, new_v)
                     num_kp = int(len(kp_coords[0]))
                     new_kp_coords = [new_u, new_v]
 

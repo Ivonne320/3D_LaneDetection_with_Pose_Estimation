@@ -6,6 +6,8 @@ import json
 # from utils import *
 from collections import defaultdict
 
+class JSONLoadError(Exception):
+    pass
 
 def compute_f1(gt_bboxs, pred_bboxs, iou_threshold=0.5):
     """
@@ -175,8 +177,8 @@ def TuSimpleEval(img_pred_lanes, img_gt_lanes, threshold = 0.85):
 
         
 def main():
-    gt_path = './data_openlane_3/annotations/openlane_keypoints_sample_validation.json'
-    pred_path = './predictions/24kps-38epoch/jsons/'
+    gt_path = './data_uniform_24kps_quarter/annotations/openlane_keypoints_sample_10validation.json'
+    pred_path = './predictions/uniform-24kps-23epoch/jsons/'
 
     # Load ground truth
     with open(gt_path) as f:
@@ -188,8 +190,22 @@ def main():
     for pred_file in pred_files:
         pred_json_path = os.path.join(pred_path, pred_file)
         img_id = pred_file.split('.')[0]
-        with open(pred_json_path, 'r') as f:
-            data_pred = json.load(f)
+        # try:
+        #     with open(pred_json_path, 'r') as f:
+        #         data_pred = json.load(f)
+        # except:
+        #     raise JSONLoadError(f"Error loading JSON file: {pred_json_path}")
+        with open(pred_json_path, 'r+') as f:
+            data = f.read()
+            f.seek(0)
+            if not data:
+                f.write('[]')
+                f.seek(0)
+            try:
+                data_pred = json.load(f)
+            except json.decoder.JSONDecodeError as e:
+                print('json.decoder.JSONDecodeError: ', e)
+                raise JSONLoadError(f"Error loading JSON file: {pred_json_path}")
             if data_pred:
                 pred_lines[img_id] = data_pred
 

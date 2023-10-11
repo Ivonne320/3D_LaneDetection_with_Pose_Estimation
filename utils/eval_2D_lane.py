@@ -108,7 +108,7 @@ class LaneEval():
         for i in range(len(gt_lanes)):            
             gt_lanes[i] = gt_lanes[i][gt_lanes[i][:,1].argsort()]
     
-        gt_lanes = [lane for lane in gt_lanes if lane.shape[0] > 1] # only consider those gt lanes with more than 1 points
+        gt_lanes = [lane for lane in gt_lanes if lane.shape[0] >= 2] # only consider those gt lanes with more than 1 points
 
         # for lane in pred_lanes:
         #     if lane is not None:
@@ -117,15 +117,18 @@ class LaneEval():
         #         print("Lane is None")
 
         # pred_lanes = [lane for lane in pred_lanes if np.array(lane).shape[0] > 1]
-        pred_lanes = [lane for lane in pred_lanes if len(lane['keypoints']) > 1]
+    
+        pred_lanes = [lane for lane in pred_lanes if len(lane['keypoints']) >= 6]
+  
         # # only consider those pred lanes overlapping with sampling range
         pred_category = [pred_category[k] for k, lane in enumerate(pred_lanes)
                         if np.array(lane['keypoints'])[4] <= self.y_samples[-1] and np.array(lane['keypoints'])[1] >= self.y_samples[0]]
         pred_lanes = [lane for lane in pred_lanes if np.array(lane['keypoints'])[-2] <= self.y_samples[-1] and np.array(lane['keypoints'])[1] >= self.y_samples[0]]
 
         pred_lanes = [prune_2d_lane_by_range(lane, self.x_min, self.x_max) for lane in pred_lanes]
+        pred_lanes = [lane for lane in pred_lanes if len(lane['keypoints']) >= 6]
 
-        pred_category = [pred_category[k] for k, lane in enumerate(pred_lanes) if len(lane['keypoints']) > 1]
+        pred_category = [pred_category[k] for k, lane in enumerate(pred_lanes) if len(lane['keypoints']) > 1 and k < len(pred_category)]
         pred_lanes = [lane for lane in pred_lanes if len(lane['keypoints']) > 1]
 
         # only consider those gt lanes overlapping with sampling range
@@ -176,7 +179,7 @@ class LaneEval():
         cnt_gt = len(gt_lanes)
 
         pred_lanes = [pred_lanes[k] for k in range(cnt_pred) if np.sum(pred_visibility_mat[k, :]) > 1]
-        pred_category = [pred_category[k] for k in range(cnt_pred) if np.sum(pred_visibility_mat[k, :]) > 1]
+        pred_category = [pred_category[k] for k in range(cnt_pred) if np.sum(pred_visibility_mat[k, :]) > 1 and k < len(pred_category)]
         pred_visibility_mat = pred_visibility_mat[np.sum(pred_visibility_mat, axis=-1) > 1, :]
         cnt_pred = len(pred_lanes)
 
@@ -273,8 +276,9 @@ class LaneEval():
                         p_lane += 1
                         match_pred_ids.append(pred_i)
                     if pred_category != []:
-                        if pred_category[pred_i] == gt_category[gt_i] or (pred_category[pred_i]==20 and gt_category[gt_i]==21):
-                            c_lane += 1    # category matched num
+                        if pred_i < len(pred_category) and gt_i < len(gt_category):
+                            if pred_category[pred_i] == gt_category[gt_i] or (pred_category[pred_i]==20 and gt_category[gt_i]==21):
+                                c_lane += 1    # category matched num
                     x_error_close.append(x_dist_mat_close[gt_i, pred_i])
                     x_error_far.append(x_dist_mat_far[gt_i, pred_i])
                     # z_error_close.append(z_dist_mat_close[gt_i, pred_i])
@@ -468,6 +472,8 @@ class LaneEval():
             #     raise Exception('file_path or lane_lines not in some predictions.')
             raw_file = pred[0]['file_name']
 
+            
+
             # pred_lanes = pred['laneLines']
             # pred_lanes_prob = pred['laneLines_prob']
             pred_lanes = pred
@@ -566,58 +572,60 @@ class LaneEval():
 
         output_stats = []
         laneline_stats = np.array(laneline_stats)
+        if laneline_stats.size > 0:
 
-        laneline_x_error_close = np.array(laneline_x_error_close)
-        laneline_x_error_far = np.array(laneline_x_error_far)
-        # laneline_z_error_close = np.array(laneline_z_error_close)
-        # laneline_z_error_far = np.array(laneline_z_error_far)
+            laneline_x_error_close = np.array(laneline_x_error_close)
+            laneline_x_error_far = np.array(laneline_x_error_far)
+            # laneline_z_error_close = np.array(laneline_z_error_close)
+            # laneline_z_error_far = np.array(laneline_z_error_far)
 
-        print("match num:"+(str(np.sum(laneline_stats[:,5]))))
-        print("cnt_gt_all:"+str(gt_num_all))
-        print("cnt_pred_all:"+str(pred_num_all))
-        print("cnt_gt_matched:"+str(np.sum(laneline_stats[:,3])))
-        print("cnt_pred_matched:"+str(np.sum(laneline_stats[:,4])))
+            # print("laneline_stats:", laneline_stats)
+            # print("match num:"+(str(np.sum(laneline_stats[:,5]))))
+            # print("cnt_gt_all:"+str(gt_num_all))
+            # print("cnt_pred_all:"+str(pred_num_all))
+            # print("cnt_gt_matched:"+str(np.sum(laneline_stats[:,3])))
+            # print("cnt_pred_matched:"+str(np.sum(laneline_stats[:,4])))
 
-        
-        if np.sum(laneline_stats[:, 3])!= 0:
-            R_lane = np.sum(laneline_stats[:, 0]) / (np.sum(laneline_stats[:, 3]))
-        else:
-            R_lane = np.sum(laneline_stats[:, 0]) / (np.sum(laneline_stats[:, 3]) + 1e-6)   # recall = TP / (TP+FN)
-        if np.sum(laneline_stats[:, 4]) != 0:
-            P_lane = np.sum(laneline_stats[:, 0]) / (np.sum(laneline_stats[:, 4]))
-        else:
-            P_lane = np.sum(laneline_stats[:, 0]) / (np.sum(laneline_stats[:, 4]) + 1e-6)   # precision = TP / (TP+FP)
-        if np.sum(laneline_stats[:, 5]) != 0:
-            C_lane = np.sum(laneline_stats[:, 2]) / (np.sum(laneline_stats[:, 5]))
-        else:
-            C_lane = np.sum(laneline_stats[:, 2]) / (np.sum(laneline_stats[:, 5]) + 1e-6)   # category_accuracy
-        if (R_lane + P_lane) != 0:
-            F_lane = 2 * R_lane * P_lane / (R_lane + P_lane)
-        else:
-            F_lane = 2 * R_lane * P_lane / (R_lane + P_lane + 1e-6)
-        x_error_close_avg = np.average(laneline_x_error_close[laneline_x_error_close > -1 + 1e-6])
-        x_error_far_avg = np.average(laneline_x_error_far[laneline_x_error_far > -1 + 1e-6])
-        # z_error_close_avg = np.average(laneline_z_error_close[laneline_z_error_close > -1 + 1e-6])
-        # z_error_far_avg = np.average(laneline_z_error_far[laneline_z_error_far > -1 + 1e-6])
+            
+            if np.sum(laneline_stats[:, 3])!= 0:
+                R_lane = np.sum(laneline_stats[:, 0]) / (np.sum(laneline_stats[:, 3]))
+            else:
+                R_lane = np.sum(laneline_stats[:, 0]) / (np.sum(laneline_stats[:, 3]) + 1e-6)   # recall = TP / (TP+FN)
+            if np.sum(laneline_stats[:, 4]) != 0:
+                P_lane = np.sum(laneline_stats[:, 0]) / (np.sum(laneline_stats[:, 4]))
+            else:
+                P_lane = np.sum(laneline_stats[:, 0]) / (np.sum(laneline_stats[:, 4]) + 1e-6)   # precision = TP / (TP+FP)
+            if np.sum(laneline_stats[:, 5]) != 0:
+                C_lane = np.sum(laneline_stats[:, 2]) / (np.sum(laneline_stats[:, 5]))
+            else:
+                C_lane = np.sum(laneline_stats[:, 2]) / (np.sum(laneline_stats[:, 5]) + 1e-6)   # category_accuracy
+            if (R_lane + P_lane) != 0:
+                F_lane = 2 * R_lane * P_lane / (R_lane + P_lane)
+            else:
+                F_lane = 2 * R_lane * P_lane / (R_lane + P_lane + 1e-6)
+            x_error_close_avg = np.average(laneline_x_error_close[laneline_x_error_close > -1 + 1e-6])
+            x_error_far_avg = np.average(laneline_x_error_far[laneline_x_error_far > -1 + 1e-6])
+            # z_error_close_avg = np.average(laneline_z_error_close[laneline_z_error_close > -1 + 1e-6])
+            # z_error_far_avg = np.average(laneline_z_error_far[laneline_z_error_far > -1 + 1e-6])
 
-        #### what is laneline_stats[:, 3 or 4] ####
+            #### what is laneline_stats[:, 3 or 4] ####
 
 
 
-        output_stats.append(F_lane)
-        output_stats.append(R_lane)
-        output_stats.append(P_lane)
-        output_stats.append(C_lane)
-        output_stats.append(x_error_close_avg)
-        output_stats.append(x_error_far_avg)
-        # output_stats.append(z_error_close_avg)
-        # output_stats.append(z_error_far_avg)
-        output_stats.append(np.sum(laneline_stats[:, 0]))   # 6
-        output_stats.append(np.sum(laneline_stats[:, 1]))   # 7
-        output_stats.append(np.sum(laneline_stats[:, 2]))   # 8
-        output_stats.append(np.sum(laneline_stats[:, 3]))   # 9
-        output_stats.append(np.sum(laneline_stats[:, 4]))   # 10
-        output_stats.append(np.sum(laneline_stats[:, 5]))   # 11
+            output_stats.append(F_lane)
+            output_stats.append(R_lane)
+            output_stats.append(P_lane)
+            output_stats.append(C_lane)
+            output_stats.append(x_error_close_avg)
+            output_stats.append(x_error_far_avg)
+            # output_stats.append(z_error_close_avg)
+            # output_stats.append(z_error_far_avg)
+            output_stats.append(np.sum(laneline_stats[:, 0]))   # 6
+            output_stats.append(np.sum(laneline_stats[:, 1]))   # 7
+            output_stats.append(np.sum(laneline_stats[:, 2]))   # 8
+            output_stats.append(np.sum(laneline_stats[:, 3]))   # 9
+            output_stats.append(np.sum(laneline_stats[:, 4]))   # 10
+            output_stats.append(np.sum(laneline_stats[:, 5]))   # 11
 
         return output_stats
 

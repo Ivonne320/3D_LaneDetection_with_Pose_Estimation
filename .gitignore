@@ -8,3 +8,4 @@ core.*
 all-images*
 course-test/
 predictions/
+runs/
