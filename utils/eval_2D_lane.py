@@ -63,8 +63,8 @@ class LaneEval():
         # self.y_max = args.view_region[0, 1]
         self.y_max = 1280
         self.y_samples = np.linspace(self.y_min, self.y_max, num=1000, endpoint=False)
-        self.dist_th = 50
-        self.ratio_th = 0.4
+        self.dist_th = 32
+        self.ratio_th = 0.75
         self.close_range = 600
 
     def bench(self, pred_lanes, pred_category, gt_lanes, gt_visibility, gt_category, raw_file, gt_cam_height, gt_cam_pitch, vis, P_g2im=None):

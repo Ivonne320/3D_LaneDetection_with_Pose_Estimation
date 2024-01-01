@@ -47,7 +47,7 @@ def compute_f1(gt_bboxs, pred_bboxs, iou_threshold=0.5):
             num_matches += 1
             FN -= 1
     
-    AP = num_matches / num_pred_lanes
+    AP = num_matches / (num_pred_lanes+ 1e-6)
     RC = num_matches / (num_matches + FN + 1e-6)
     f1 = 2 * AP * RC / (AP + RC + 1e-6)
 
@@ -59,7 +59,7 @@ def compute_f1(gt_bboxs, pred_bboxs, iou_threshold=0.5):
 
     return avg_iou, f1
 
-def compute_lane_accuracy(pred_lane, gt_lane, threshold = 20):
+def compute_lane_accuracy(pred_lane, gt_lane, threshold = 32):
     pred_keyponits = np.array(pred_lane['keypoints']).reshape(-1, 3)
     gt_keyponits = np.array(gt_lane['keypoints']).reshape(-1, 3)
     #get the nearest gt keypoint for each pred keypoint and compute the distance
@@ -110,6 +110,8 @@ def CULaneEval(img_pred_lanes, img_gt_lanes):
     for lane in img_gt_lanes:
         gt_bboxs.append(lane['bbox'])
     avg_iou, f1 = compute_f1(gt_bboxs, pred_bboxs)
+    if len(img_gt_lanes) == 0 and len(img_pred_lanes) == 0:
+        f1 = 1
     return avg_iou, f1
 
 def TuSimpleEval(img_pred_lanes, img_gt_lanes, threshold = 0.85): 
@@ -172,14 +174,17 @@ def TuSimpleEval(img_pred_lanes, img_gt_lanes, threshold = 0.85):
     # RC2 = TP / len(img_gt_lanes)
     f1_1 = 2 * AP1 * RC1 / (AP1 + RC1 + 1e-6)
     # f1_2 = 2 * AP2 * RC2 / (AP2 + RC2 + 1e-6)
+    if len(img_gt_lanes) == 0 and len(img_pred_lanes) == 0:
+        f1_1 = 1
     return f1_1
 
 
         
 def main():
-    gt_path = './data_uniform_24kps_quarter/annotations/openlane_keypoints_sample_10validation.json'
-    pred_path = './predictions/uniform-24kps-23epoch/jsons/'
-
+    # gt_path = './data_twicedownsampling_sample/annotations/openlane_keypoints_sample_10validation.json'
+    # pred_path = './predictions/twice_downsampling-112epoch/jsons/'
+    gt_path = './data_twicedownsampling_sample/annotations/openlane_keypoints_sample_10validation.json'
+    pred_path = './predictions/twice_downsampling-158epoch/jsons/'
     # Load ground truth
     with open(gt_path) as f:
         gt = json.load(f)
@@ -213,7 +218,7 @@ def main():
     for img, pred in pred_lines.items():
         for gt_item in gt['annotations']:
             if gt_item['image_id'] == int(img):
-                # gt_item['pred'] = pred
+                gt_item['pred'] = pred
                 print('found pred for img', img)
                 gt_lines[str(img)].append(gt_item)
     

@@ -1,4 +1,5 @@
 import eval_2D_lane
+import eval_tu_bench
 from utils import *
 import json
 import os
@@ -36,7 +37,7 @@ gt_list = []
 pred_list = []
 
 # Get all prediction paths
-prediction_parent_dir = "./predictions/2kps-117epoch/jsons/"
+prediction_parent_dir = "./predictions/twice_downsampling-158epoch/jsons/"
 all_pred_paths = [os.path.join(prediction_parent_dir, fname) for fname in os.listdir(prediction_parent_dir) if fname.endswith('.predictions.json')]
 # Sort them based on order number
 all_pred_paths.sort(key=extract_order_number)
@@ -82,7 +83,8 @@ def process_batch(gt_batch, pred_batch, evaluator):
                 pred_data[0]['file_name'] = new_path
                 pred_sub_lines.append(pred_data)
             
-            result = evaluator.bench_one_submit_openlane_DDP(pred_sub_lines, gt_sub_lines)
+            # result = evaluator.bench_one_submit_openlane_DDP(pred_sub_lines, gt_sub_lines)
+            result = evaluator.bench(pred_sub_lines, gt_sub_lines,24)
             
     return result
 
@@ -92,8 +94,10 @@ results = []
 for i in range(0, len(gt_list), BATCH_SIZE):
     gt_batch = gt_list[i:i+BATCH_SIZE]
     pred_batch = pred_list[i:i+BATCH_SIZE]
-    evaluator = eval_2D_lane.LaneEval()
+    # evaluator = eval_2D_lane.LaneEval()
+    evaluator = eval_tu_bench.LaneEval()
     batch_results = process_batch(gt_batch, pred_batch, evaluator)
+
     results.append(np.array(batch_results))
     print("Batch Results: ", batch_results)
 
