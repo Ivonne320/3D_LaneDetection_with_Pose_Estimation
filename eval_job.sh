@@ -1,1 +1,0 @@
-sbatch eval.bat
