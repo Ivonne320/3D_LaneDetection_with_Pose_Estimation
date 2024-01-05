@@ -10,12 +10,13 @@
 echo STARTING
 
 
-find /work/vita/datasets/OpenDriveLab___OpenLane/raw/images/training/segment-5592790652933523081_667_770_687_770_with_camera_labels/ -path '*.jpg' | xargs -n 1 -P 8 python3 -m openpifpaf.predict --checkpoint /home/yiwang/CIVIL-459-Project/outputs/twice_downsampling_24kps_25/shufflenetv2k16-231127-064149-openlane-slurm1509203.pkl.epoch300 \
+find /work/vita/datasets/OpenDriveLab___OpenLane/raw/images/validation/ -path '**/*.jpg' | xargs -n 1 -P 8 python3 -m openpifpaf.predict --checkpoint /home/yiwang/CIVIL-459-Project/outputs/48kps/v16-sample/coco_same/shufflenetv2k16-240102-003036-openlane-slurm1546464.pkl.epoch069 \
 --debug-indices cif:0 caf:0 \
---loader-workers=8 --force-complete-pose --instance-threshold=0.05 \
+--loader-workers=8 --force-complete-pose --instance-threshold=0.1 \
 --batch-size=32 \
---long-edge=425 \
---json-output=./predictions/twice_downsampling-300epoch/val-jsons/demo_2 \
+--long-edge=846 \
+--json-output=./predictions/48kps-69epoch-eval/ \
+
 
 
 

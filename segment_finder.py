@@ -4,7 +4,7 @@ import os
 import json
 import glob
 
-pred_path = "/home/yiwang/CIVIL-459-Project/predictions/twice_downsampling-180epoch/val-jsons/"
+pred_path = "/home/yiwang/CIVIL-459-Project/predictions/48kps-69epoch-eval/"
 gt_path = "/work/vita/datasets/OpenDriveLab___OpenLane/raw/images/validation/"
 segment_names = os.listdir(gt_path)
 # print(segment_names)
