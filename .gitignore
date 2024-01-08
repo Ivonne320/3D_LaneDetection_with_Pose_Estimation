@@ -9,7 +9,6 @@ all-images*
 course-test/
 predictions/
 runs/
-*.png
 *.json
 *.sh
 

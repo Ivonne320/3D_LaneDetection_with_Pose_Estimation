@@ -18,7 +18,7 @@ This repo contains the source code for the semester project Monocular 3D lane de
 ## Installation
 ### 1. Clone this repository
 ``` bash
-git clone https://github.com/vita-student-projects/3dlane_detection_pifpaf_gr19.git
+git clone https://github.com/Ivonne320/3D_LaneDetection_with_Pose_Estimation.git
 ```
 
 ### 2. Install OpenPifPaf
@@ -29,7 +29,7 @@ pip3 install openpifpaf
 The required files to register our dataset as a plugin is contained in the folder `openpifpaf_openlane`. (IMPORTANT: Do not change the name of this folder as OpenPifPaf requires this naming convention to recognise the plugin.)
 
 ### 3. Download checkpoint (optional)
-A [checkpoint](https://drive.google.com/file/d/1IEKkXFKS5HWgyEEhrRoDiCdvLgZRtmV7/view?usp=sharing) for 2D keypoint lane detection trained on 25% of OpenLane training set for 300 epochs is provided, as well as [our finetuned ZoeDepth model]() on OpenLane (for only 600 OpenLane images). 
+A [checkpoint](https://drive.google.com/file/d/16RwIHEp8VzhydVFQOrDUeawPD3_K_uYa/view?usp=sharing) for 2D keypoint lane detection trained on 25% of OpenLane training set for 300 epochs is provided, as well as [our finetuned ZoeDepth model](https://drive.google.com/file/d/19675PHPn1B4B0fPbu4cwHpAmkDcAvKiN/view?usp=sharing) on OpenLane (for only 600 OpenLane images). 
 
 ## Dataset
 The dataset that we work with is [OpenLane](https://github.com/OpenDriveLab/OpenLane).
